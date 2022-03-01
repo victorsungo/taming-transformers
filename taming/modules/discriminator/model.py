@@ -35,6 +35,7 @@ class NLayerDiscriminator(nn.Module):
             use_bias = norm_layer.func != nn.BatchNorm2d
         else:
             use_bias = norm_layer != nn.BatchNorm2d
+        print("################ n_layers: ", n_layers)
 
         kw = 4
         padw = 1
@@ -61,7 +62,9 @@ class NLayerDiscriminator(nn.Module):
         sequence += [
             nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         self.main = nn.Sequential(*sequence)
+        # print(self.main)
 
     def forward(self, input):
         """Standard forward."""
+        # print(self.main)
         return self.main(input)

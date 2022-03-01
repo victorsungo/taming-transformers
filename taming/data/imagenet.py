@@ -92,7 +92,8 @@ class ImageNetBase(Dataset):
         with open(self.txt_filelist, "r") as f:
             self.relpaths = f.read().splitlines()
             l1 = len(self.relpaths)
-            self.relpaths = self._filter_relpaths(self.relpaths)
+            self.relpaths = self._filter_relpaths(self.relpaths)[:10000]
+            print("###########################  ", len(self.relpaths))
             print("Removed {} files from filelist during filtering.".format(l1 - len(self.relpaths)))
 
         self.synsets = [p.split("/")[0] for p in self.relpaths]
@@ -166,7 +167,7 @@ class ImageNetTrain(ImageNetBase):
 
 
             filelist = glob.glob(os.path.join(datadir, "**", "*.JPEG"))
-            filelist = [os.path.relpath(p, start=datadir) for p in filelist]
+            filelist = [os.path.relpath(p, start=datadir) for p in filelist[:100]]
             filelist = sorted(filelist)
             filelist = "\n".join(filelist)+"\n"
             with open(self.txt_filelist, "w") as f:
@@ -174,6 +175,71 @@ class ImageNetTrain(ImageNetBase):
 
             bdu.mark_prepared(self.root)
 
+
+# class ImageNetValidation(ImageNetBase):
+#     NAME = "ILSVRC2012_validation"
+#     URL = "http://www.image-net.org/challenges/LSVRC/2012/"
+#     AT_HASH = "5d6d0df7ed81efd49ca99ea4737e0ae5e3a5f2e5"
+#     VS_URL = "https://heibox.uni-heidelberg.de/f/3e0f6e9c624e45f2bd73/?dl=1"
+#     FILES = [
+#         "ILSVRC2012_img_val.tar",
+#         "validation_synset.txt",
+#     ]
+#     SIZES = [
+#         6744924160,
+#         1950000,
+#     ]
+#
+#     def _prepare(self):
+#         self.random_crop = retrieve(self.config, "ImageNetValidation/random_crop",
+#                                     default=False)
+#         cachedir = os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache"))
+#         self.root = os.path.join(cachedir, "autoencoders/data", self.NAME)
+#         self.datadir = os.path.join(self.root, "data")
+#         self.txt_filelist = os.path.join(self.root, "filelist.txt")
+#         self.expected_length = 50000
+#         if not bdu.is_prepared(self.root):
+#             # prep
+#             print("Preparing dataset {} in {}".format(self.NAME, self.root))
+#
+#             datadir = self.datadir
+#             if not os.path.exists(datadir):
+#                 path = os.path.join(self.root, self.FILES[0])
+#                 if not os.path.exists(path) or not os.path.getsize(path)==self.SIZES[0]:
+#                     import academictorrents as at
+#                     atpath = at.get(self.AT_HASH, datastore=self.root)
+#                     assert atpath == path
+#
+#                 print("Extracting {} to {}".format(path, datadir))
+#                 os.makedirs(datadir, exist_ok=True)
+#                 with tarfile.open(path, "r:") as tar:
+#                     tar.extractall(path=datadir)
+#
+#                 vspath = os.path.join(self.root, self.FILES[1])
+#                 if not os.path.exists(vspath) or not os.path.getsize(vspath)==self.SIZES[1]:
+#                     download(self.VS_URL, vspath)
+#
+#                 with open(vspath, "r") as f:
+#                     synset_dict = f.read().splitlines()
+#                     synset_dict = dict(line.split() for line in synset_dict)
+#
+#                 print("Reorganizing into synset folders")
+#                 synsets = np.unique(list(synset_dict.values()))
+#                 for s in synsets:
+#                     os.makedirs(os.path.join(datadir, s), exist_ok=True)
+#                 for k, v in synset_dict.items():
+#                     src = os.path.join(datadir, k)
+#                     dst = os.path.join(datadir, v)
+#                     shutil.move(src, dst)
+#
+#             filelist = glob.glob(os.path.join(datadir, "**", "*.JPEG"))
+#             filelist = [os.path.relpath(p, start=datadir) for p in filelist]
+#             filelist = sorted(filelist)
+#             filelist = "\n".join(filelist)+"\n"
+#             with open(self.txt_filelist, "w") as f:
+#                 f.write(filelist)
+#
+#             bdu.mark_prepared(self.root)
 
 class ImageNetValidation(ImageNetBase):
     NAME = "ILSVRC2012_validation"

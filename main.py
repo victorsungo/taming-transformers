@@ -151,12 +151,18 @@ class DataModuleFromConfig(pl.LightningDataModule):
 
     def prepare_data(self):
         for data_cfg in self.dataset_configs.values():
+            print(data_cfg['target'])
+            if "ImageNetValidation" in data_cfg['target']:
+                print("ImageNetValidation !!!")
+                continue
+
             instantiate_from_config(data_cfg)
 
     def setup(self, stage=None):
         self.datasets = dict(
             (k, instantiate_from_config(self.dataset_configs[k]))
             for k in self.dataset_configs)
+        print("!!!", self.datasets)
         if self.wrap:
             for k in self.datasets:
                 self.datasets[k] = WrappedDataset(self.datasets[k])
@@ -372,7 +378,7 @@ if __name__ == "__main__":
     opt, unknown = parser.parse_known_args()
     if opt.name and opt.resume:
         raise ValueError(
-            "-n/--name and -r/--resume cannot be specified both."
+            "-n/--name and -r/checkpo cannot be specified both."
             "If you want to resume training in a new log folder, "
             "use -n/--name in combination with --resume_from_checkpoint"
         )

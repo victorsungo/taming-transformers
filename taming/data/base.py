@@ -53,9 +53,17 @@ class ImagePaths(Dataset):
 
     def __getitem__(self, i):
         example = dict()
-        example["image"] = self.preprocess_image(self.labels["file_path_"][i])
+        # print(self.labels["file_path_"][i])
+        try:
+            example["image"] = self.preprocess_image(self.labels["file_path_"][i])
+        except:
+            print("Bad Image !!!")
+            example["image"] = self.preprocess_image('/home/zhengkai/.cache/autoencoders/data/ILSVRC2012_train/data/n01910747/n01910747_3457.JPEG')
+
+        # print("example[image]", example["image"])
         for k in self.labels:
             example[k] = self.labels[k][i]
+        # print("example!!!!!!!!!!",example)
         return example
 
 
